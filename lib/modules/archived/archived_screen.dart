@@ -1,19 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../shared/components/components.dart';
+import '../../shared/cubit/cubit.dart';
+import '../../shared/cubit/states.dart';
 
 class ArchivedScreen extends StatelessWidget {
   const ArchivedScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Archived',
-        style: TextStyle(
-            color: Colors.blue,
-            fontWeight: FontWeight.bold,
-            fontSize: 30
-        ),
-      ),
-    );;
+    return BlocConsumer<AppCubit , AppStates>(
+        builder: (context , states){
+          var tasks = AppCubit.get(context).archivedTasks;
+          return tasks.isEmpty?errorMessage(): ListView.separated(
+              itemBuilder: (context , item){
+                return taskItem(model: tasks[item]);
+              },
+              separatorBuilder: (context,item)=>Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.grey[300],
+                  height: 1,
+                ),
+              ),
+              itemCount: tasks.length);},
+        listener: (context , states){}
+    );
   }
 }

@@ -1,10 +1,13 @@
+import 'dart:async';
+
+
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TODODatabase{
   static Database? databaseInstance = null;
   static TODODatabase Instance = TODODatabase();
-
-  Future<Database?> getInstance() async {
+  Future<Database?> getInstance(List<Map> allTasks) async {
     if(databaseInstance !=null){
       return databaseInstance;
     }
@@ -28,11 +31,22 @@ class TODODatabase{
     print('Database returned');
     return databaseInstance;
   }
-
-  void insertToDatabase(String title , String date , String time , String status){
-    databaseInstance?.transaction((txn){
-     return txn.rawInsert('INSERT INTO tasks (title, date, time, status) VALUES ("$title", "$date" , "$time" , "$status")')
+  Future<int> DeleteData(int id) async{
+    return await databaseInstance!.rawDelete('DELETE FROM tasks WHERE id = ?', [id]);
+  }
+  Future<int> UpdateData(String status , int id) async{
+    return await databaseInstance!.rawUpdate(
+        'UPDATE tasks SET status = ? WHERE id = ?',
+        [status, id]);
+  }
+  Future? insertToDatabase(String title , String date , String time) async{
+    return await databaseInstance?.transaction((txn){
+     return txn.rawInsert('INSERT INTO tasks (title, date, time, status) VALUES ("$title", "$date" , "$time" , "new")')
           .then((value){print('$value Inserted Successfully');}).catchError((onError){print("Error on inserting: ${onError.toString()}");});
     });
+  }
+  
+  Future<List<Map<String, Object?>>> getAllTasks(Database? database) async {
+    return await database!.rawQuery('SELECT * FROM tasks');
   }
 }
